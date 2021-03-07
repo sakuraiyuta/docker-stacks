@@ -1,0 +1,35 @@
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+ARG OWNER
+ARG BASE_CONTAINER=$OWNER/scipy-notebook
+FROM $BASE_CONTAINER
+
+LABEL maintainer="Jupyter Project <jupyter@googlegroups.com>"
+
+ARG NB_USER="jovyan"
+ARG NB_UID="1000"
+ARG NB_GID="100"
+
+USER root
+
+RUN apt-get update >/dev/null && apt-get -y install curl >/dev/null
+
+USER $NB_UID
+
+ARG tensorflow_whl_base_url="https://raw.githubusercontent.com/PINTO0309/Tensorflow-bin/master"
+ARG tensorflow_sh_filename="tensorflow-2.4.0-cp38-none-linux_aarch64_download.sh"
+ARG tensorflow_whl_filename="tensorflow-2.4.0-cp38-none-linux_aarch64.whl"
+ENV TENSORFLOW_WHL_BASE_URL="$tensorflow_whl_base_url" \
+    TENSORFLOW_SH_FILENAME="$tensorflow_sh_filename" \
+    TENSORFLOW_WHL_FILENAME="$tensorflow_whl_filename"
+
+# Install Tensorflow
+RUN wget "${TENSORFLOW_WHL_BASE_URL}/${TENSORFLOW_SH_FILENAME}" && \
+    bash ./${TENSORFLOW_SH_FILENAME} && \
+    pip3 install ${TENSORFLOW_WHL_FILENAME} \
+    fix-permissions "${CONDA_DIR}" && \
+    fix-permissions "/home/${NB_USER}"
+
+#RUN mamba install --quiet tensorflow \
+#    fix-permissions "${CONDA_DIR}" && \
+#    fix-permissions "/home/${NB_USER}"

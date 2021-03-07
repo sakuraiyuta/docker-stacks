@@ -1,0 +1,67 @@
+name: Build Docker Images(aarch64)
+
+on:
+  pull_request:
+    paths-ignore:
+      - "*.md"
+      - "binder/**"
+      - "docs/**"
+      - "examples/**"
+  push:
+    branches:
+      - master
+      - fix/arm64
+    paths-ignore:
+      - "*.md"
+      - "binder/**"
+      - "docs/**"
+      - "examples/**"
+
+jobs:
+  aarch64_build:
+    name: Build Docker Images
+    runs-on: ubuntu-18.04
+    if: >
+      !contains(github.event.head_commit.message, 'ci skip') &&
+      !contains(github.event.pull_request.title, 'ci skip')
+    steps:
+      - name: Clone Main Repo
+        uses: actions/checkout@v2
+        with:
+          path: main
+      - name: Clone Wiki
+        uses: actions/checkout@v2
+        with:
+          repository: ${{github.repository}}.wiki
+          path: wiki
+      - name: Build Docker Images
+        if: github.ref == 'refs/heads/fix/arm64'
+        uses: uraimo/run-on-arch-action@v2.0.5
+        with:
+          arch: aarch64
+          distro: ubuntu20.04
+          setup: |
+            echo 'EXTRA_OPTS="-L /usr/aarch64-linux-gnu"' | sudo tee /etc/qemu-binfmt.conf
+            sudo systemctl restart systemd-binfmt
+            sudo update-binfmts --enable
+          run: |
+            echo "### Install dependencies"
+            make -C main dev-env
+            echo "### Run Build"
+            make -C main build-all
+            echo "### Run Post-Build Hooks"
+            make -C main hook-all
+            echo "### Login to Dockerhub"
+            echo '${{secrets.DOCKERHUB_PASSWORD}}' | docker login --username '${{secrets.DOCKERHUB_USERNAME}}' --password-stdin
+            echo "### Push Images to Dockerhub"
+            make -C main push-all
+          env: |
+            QEMU_LD_PREFIX: /usr/aarch64-linux-gnu
+            BUILDKIT_PROGRESS: plain
+            COMMIT_MSG: "${{github.event.head_commit.message}}"
+            WIKI_PATH: ../wiki
+          install: |
+            apt-get update -q -y >/dev/null
+            apt-get install -q -y python-is-python3 python3-pip libc6 make patch curl >/dev/null
+            python -m pip install --upgrade pip
+            curl -fsSL get.docker.com | CHANNEL=stable sh

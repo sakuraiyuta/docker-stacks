@@ -1,0 +1,55 @@
+--- Dockerfile	2021-03-11 13:46:59.275267375 +0000
++++ Dockerfile.aarch64	2021-03-11 13:46:54.819291828 +0000
+@@ -4,7 +4,7 @@
+ # Ubuntu 20.04 (focal)
+ # https://hub.docker.com/_/ubuntu/?tab=tags&name=focal
+ # OS/ARCH: linux/amd64
+-ARG ROOT_CONTAINER=ubuntu:focal-20210119@sha256:3093096ee188f8ff4531949b8f6115af4747ec1c58858c091c8cb4579c39cc4e
++ARG ROOT_CONTAINER=ubuntu:focal-20210119@sha256:303f0f41357173e133edee96798f4d2714fdda0e97c9efd3f7b786f17228f4bf
+ 
+ ARG BASE_CONTAINER=$ROOT_CONTAINER
+ FROM $BASE_CONTAINER
+@@ -28,7 +28,7 @@
+ # Miniforge installer patch version
+ ARG miniforge_patch_number="7"
+ # Miniforge installer architecture
+-ARG miniforge_arch="x86_64"
++ARG miniforge_arch="aarch64"
+ # Package Manager and Python implementation to use (https://github.com/conda-forge/miniforge)
+ # - conda only: either Miniforge3 to use Python or Miniforge-pypy3 to use PyPy
+ # - conda + mamba: either Mambaforge to use Python or Mambaforge-pypy3 to use PyPy
+@@ -39,7 +39,7 @@
+ # Miniforge installer
+ ARG miniforge_installer="${miniforge_python}-${miniforge_version}-Linux-${miniforge_arch}.sh"
+ # Miniforge checksum
+-ARG miniforge_checksum="5a827a62d98ba2217796a9dc7673380257ed7c161017565fba8ce785fb21a599"
++ARG miniforge_checksum="7332318ef8c7de0ff29f146949972895412610449fd8a339463e09d70304c36e"
+ 
+ # Install all OS dependencies for notebook server that starts but lacks all
+ # features (e.g., download as all possible file formats)
+@@ -52,6 +52,7 @@
+     locales \
+     fonts-liberation \
+     run-one \
++    pandoc \
+  && apt-get clean && rm -rf /var/lib/apt/lists/*
+ 
+ RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
+@@ -110,6 +111,8 @@
+     rm "${miniforge_installer}" && \
+     # Conda configuration see https://conda.io/projects/conda/en/latest/configuration.html
+     echo "conda ${CONDA_VERSION}" >> $CONDA_DIR/conda-meta/pinned && \
++    conda config --add channels c4aarch64 && \
++    conda config --add channels conda-forge && \
+     conda config --system --set auto_update_conda false && \
+     conda config --system --set show_channel_urls true && \
+     if [ ! $PYTHON_VERSION = 'default' ]; then conda install --yes python=$PYTHON_VERSION; fi && \
+@@ -131,7 +134,7 @@
+ # Correct permissions
+ # Do all this in a single RUN command to avoid duplicating all of the
+ # files across image layers when the permissions change
+-RUN conda install --quiet --yes \
++RUN mamba install --quiet --yes \
+     'notebook=6.2.0' \
+     'jupyterhub=1.3.0' \
+     'jupyterlab=3.0.9' && \

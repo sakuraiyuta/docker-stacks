@@ -1,0 +1,11 @@
+--- Dockerfile	2021-03-11 05:27:26.016722279 +0000
++++ Dockerfile.aarch64	2021-03-11 05:26:39.108795129 +0000
+@@ -1,6 +1,7 @@
+ # Copyright (c) Jupyter Development Team.
+ # Distributed under the terms of the Modified BSD License.
+-ARG BASE_CONTAINER=jupyter/pyspark-notebook
++ARG OWNER
++ARG BASE_CONTAINER=$OWNER/pyspark-notebook
+ FROM $BASE_CONTAINER
+ 
+ LABEL maintainer="Jupyter Project <jupyter@googlegroups.com>"

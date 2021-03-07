@@ -5,11 +5,19 @@
 # Use bash for inline if-statements in arch_patch target
 SHELL:=bash
 ARCH:=$(shell uname -m)
-OWNER?=jupyter
+OWNER?=sakuraiyuta
 
 # Need to list the images in build dependency order
 ifeq ($(ARCH),ppc64le)
 ALL_STACKS:=base-notebook
+else ifeq ($(ARCH),aarch64)
+ALL_STACKS:=base-notebook \
+	minimal-notebook \
+	r-notebook \
+	scipy-notebook \
+	datascience-notebook \
+	pyspark-notebook \
+	all-spark-notebook
 else
 ALL_STACKS:=base-notebook \
 	minimal-notebook \
@@ -50,7 +58,7 @@ arch_patch/%: ## apply hardware architecture specific patches to the Dockerfile
 
 build/%: DARGS?=
 build/%: ## build the latest image for a stack
-	docker build $(DARGS) --rm --force-rm -t $(OWNER)/$(notdir $@):latest ./$(notdir $@)
+	docker build $(DARGS) --rm --force-rm -t $(OWNER)/$(notdir $@):latest ./$(notdir $@) --build-arg OWNER=${OWNER}
 	@echo -n "Built image size: "
 	@docker images $(OWNER)/$(notdir $@):latest --format "{{.Size}}"
 
@@ -127,7 +135,7 @@ img-rm-dang: ## remove dangling images (tagged None)
 hadolint/%: ARGS?=
 hadolint/%: ## lint the dockerfile(s) for a stack
 	@echo "Linting Dockerfiles in $(notdir $@)..."
-	@git ls-files --exclude='Dockerfile*' --ignored $(notdir $@) | grep -v ppc64 | xargs -L 1 $(HADOLINT) $(ARGS)
+	@git ls-files --exclude='Dockerfile*' --ignored $(notdir $@) | grep -v "\.patch" | grep -v .ppc64 | xargs -L 1 $(HADOLINT) $(ARGS)
 	@echo "Linting done!"
 
 hadolint-all: $(foreach I,$(ALL_IMAGES),hadolint/$(I) ) ## lint all stacks
