@@ -134,6 +134,7 @@ def _import_packages(package_helper, filtered_packages, check_function, max_fail
     failures = {}
     LOGGER.info("Testing the import of packages ...")
     for package in filtered_packages:
+        package = package.replace('-', '_')
         LOGGER.info(f"Trying to import {package}")
         try:
             assert (
