@@ -33,6 +33,9 @@ ARG miniforge_arch="aarch64"
 # - conda only: either Miniforge3 to use Python or Miniforge-pypy3 to use PyPy
 # - conda + mamba: either Mambaforge to use Python or Mambaforge-pypy3 to use PyPy
 ARG miniforge_python="Mambaforge"
+# Default Package Manager command
+#ARG conda_install_cmd="conda"
+ARG conda_install_cmd="mamba"
 
 # Miniforge archive to install
 ARG miniforge_version="${conda_version}-${miniforge_patch_number}"
@@ -71,6 +74,7 @@ ENV PATH=$CONDA_DIR/bin:$PATH \
     HOME=/home/$NB_USER \
     CONDA_VERSION="${conda_version}" \
     MINIFORGE_VERSION="${miniforge_version}"
+ENV CONDA_INSTALL_CMD="${conda_install_cmd}"
 
 # Copy a script that we will use to correct permissions after running certain commands
 COPY fix-permissions /usr/local/bin/fix-permissions
@@ -111,17 +115,18 @@ RUN wget --quiet "https://github.com/conda-forge/miniforge/releases/download/${m
     rm "${miniforge_installer}" && \
     # Conda configuration see https://conda.io/projects/conda/en/latest/configuration.html
     echo "conda ${CONDA_VERSION}" >> $CONDA_DIR/conda-meta/pinned && \
-    conda config --add channels c4aarch64 && \
-    conda config --add channels conda-forge && \
+    conda config --append channels conda-forge && \
+    conda config --append channels c4aarch64 && \
+    conda config --system --set channel_priority false && \
     conda config --system --set auto_update_conda false && \
     conda config --system --set show_channel_urls true && \
-    if [ ! $PYTHON_VERSION = 'default' ]; then conda install --yes python=$PYTHON_VERSION; fi && \
+    if [ ! $PYTHON_VERSION = 'default' ]; then ${CONDA_INSTALL_CMD} install --yes python=$PYTHON_VERSION; fi && \
     conda list python | grep '^python ' | tr -s ' ' | cut -d '.' -f 1,2 | sed 's/$/.*/' >> $CONDA_DIR/conda-meta/pinned && \
-    conda install --quiet --yes \
+    ${CONDA_INSTALL_CMD} install --quiet --yes \
     "conda=${CONDA_VERSION}" \
     'pip' \
     'tini=0.18.0' && \
-    conda update --all --quiet --yes && \
+    ${CONDA_INSTALL_CMD} update --all --quiet --yes && \
     conda list tini | grep tini | tr -s ' ' | cut -d ' ' -f 1,2 >> $CONDA_DIR/conda-meta/pinned && \
     conda clean --all -f -y && \
     rm -rf /home/$NB_USER/.cache/yarn && \
@@ -134,7 +139,7 @@ RUN wget --quiet "https://github.com/conda-forge/miniforge/releases/download/${m
 # Correct permissions
 # Do all this in a single RUN command to avoid duplicating all of the
 # files across image layers when the permissions change
-RUN mamba install --quiet --yes \
+RUN ${CONDA_INSTALL_CMD} install --quiet --yes \
     'notebook=6.2.0' \
     'jupyterhub=1.3.0' \
     'jupyterlab=3.0.9' && \

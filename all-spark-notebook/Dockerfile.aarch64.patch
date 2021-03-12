@@ -1,6 +1,6 @@
---- Dockerfile	2021-03-11 05:27:26.016722279 +0000
-+++ Dockerfile.aarch64	2021-03-11 05:26:39.108795129 +0000
-@@ -1,6 +1,7 @@
+--- Dockerfile.orig
++++ Dockerfile.aarch64
+@@ -1,10 +1,16 @@
  # Copyright (c) Jupyter Development Team.
  # Distributed under the terms of the Modified BSD License.
 -ARG BASE_CONTAINER=jupyter/pyspark-notebook
@@ -9,3 +9,30 @@
  FROM $BASE_CONTAINER
  
  LABEL maintainer="Jupyter Project <jupyter@googlegroups.com>"
+ 
++# Default Package Manager command
++#ARG conda_install_cmd="conda"
++ARG conda_install_cmd="mamba"
++ENV CONDA_INSTALL_CMD="${conda_install_cmd}"
++
+ USER root
+ 
+ # RSpark config
+@@ -22,7 +28,7 @@
+ USER $NB_UID
+ 
+ # R packages
+-RUN conda install --quiet --yes \
++RUN ${CONDA_INSTALL_CMD} install --quiet --yes \
+     'r-base=4.0.3' \
+     'r-ggplot2=3.3*' \
+     'r-irkernel=1.1*' \
+@@ -34,7 +40,7 @@
+     fix-permissions "/home/${NB_USER}"
+ 
+ # Spylon-kernel
+-RUN conda install --quiet --yes 'spylon-kernel=0.4*' && \
++RUN ${CONDA_INSTALL_CMD} install --quiet --yes 'spylon-kernel=0.4*' && \
+     conda clean --all -f -y && \
+     python -m spylon_kernel install --sys-prefix && \
+     rm -rf "/home/${NB_USER}/.local" && \

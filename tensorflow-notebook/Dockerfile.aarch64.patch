@@ -1,5 +1,5 @@
---- Dockerfile	2021-03-11 16:21:24.801307109 +0000
-+++ Dockerfile.aarch64	2021-03-11 16:21:21.905327447 +0000
+--- Dockerfile.orig
++++ Dockerfile.aarch64
 @@ -1,12 +1,35 @@
  # Copyright (c) Jupyter Development Team.
  # Distributed under the terms of the Modified BSD License.

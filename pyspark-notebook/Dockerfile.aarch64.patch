@@ -1,6 +1,6 @@
---- Dockerfile	2021-03-11 05:27:26.024722269 +0000
-+++ Dockerfile.aarch64	2021-03-11 05:26:39.112795121 +0000
-@@ -1,6 +1,7 @@
+--- Dockerfile.orig
++++ Dockerfile.aarch64
+@@ -1,10 +1,16 @@
  # Copyright (c) Jupyter Development Team.
  # Distributed under the terms of the Modified BSD License.
 -ARG BASE_CONTAINER=jupyter/scipy-notebook
@@ -9,3 +9,21 @@
  FROM $BASE_CONTAINER
  
  LABEL maintainer="Jupyter Project <jupyter@googlegroups.com>"
+ 
++# Default Package Manager command
++#ARG conda_install_cmd="conda"
++ARG conda_install_cmd="mamba"
++ENV CONDA_INSTALL_CMD="${conda_install_cmd}"
++
+ # Fix DL4006
+ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+ 
+@@ -58,7 +64,7 @@
+ USER $NB_UID
+ 
+ # Install pyarrow
+-RUN conda install --quiet --yes --satisfied-skip-solve \
++RUN ${CONDA_INSTALL_CMD} install --quiet --yes --satisfied-skip-solve \
+     'pyarrow=3.0.*' && \
+     conda clean --all -f -y && \
+     fix-permissions "${CONDA_DIR}" && \

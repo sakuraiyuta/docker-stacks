@@ -6,6 +6,11 @@ FROM $BASE_CONTAINER
 
 LABEL maintainer="Jupyter Project <jupyter@googlegroups.com>"
 
+# Default Package Manager command
+#ARG conda_install_cmd="conda"
+ARG conda_install_cmd="mamba"
+ENV CONDA_INSTALL_CMD="${conda_install_cmd}"
+
 USER root
 
 # RSpark config
@@ -23,7 +28,7 @@ RUN apt-get update && \
 USER $NB_UID
 
 # R packages
-RUN conda install --quiet --yes \
+RUN ${CONDA_INSTALL_CMD} install --quiet --yes \
     'r-base=4.0.3' \
     'r-ggplot2=3.3*' \
     'r-irkernel=1.1*' \
@@ -35,7 +40,7 @@ RUN conda install --quiet --yes \
     fix-permissions "/home/${NB_USER}"
 
 # Spylon-kernel
-RUN conda install --quiet --yes 'spylon-kernel=0.4*' && \
+RUN ${CONDA_INSTALL_CMD} install --quiet --yes 'spylon-kernel=0.4*' && \
     conda clean --all -f -y && \
     python -m spylon_kernel install --sys-prefix && \
     rm -rf "/home/${NB_USER}/.local" && \
