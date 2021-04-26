@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ARCH="aarch64"
-declare -a IMAGES=(base-notebook datascience-notebook minimal-notebook r-notebook scipy-notebook tensorflow-notebook all-spark-notebook pyspark-notebook)
+declare -a IMAGES=(base-notebook datascience-notebook minimal-notebook r-notebook scipy-notebook tensorflow-notebook all-spark-notebook pyspark-notebook mecab-notebook)
 
 for IMAGE in ${IMAGES[@]}; do
   cd ${IMAGE}
