@@ -29,10 +29,10 @@ RUN R -e 'install.packages("RMeCab",repos="https://rmecab.jp/R/",type="source",l
 
 USER $NB_UID
 
-RUN mamba install --quiet --yes \
-    'conda-forge::mecab-python3' && \
-    conda clean --all -f -y && \
-    fix-permissions "${CONDA_DIR}" && \
-    fix-permissions "/home/${NB_USER}"
+#RUN mamba install --quiet --yes -c conda-forge \
+#    mecab-python3 && \
+#    conda clean --all -f -y && \
+#    fix-permissions "${CONDA_DIR}" && \
+#    fix-permissions "/home/${NB_USER}"
 
 WORKDIR $HOME
