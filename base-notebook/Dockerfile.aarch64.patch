@@ -1,4 +1,4 @@
---- Dockerfile.orig
+--- Dockerfile
 +++ Dockerfile.aarch64
 @@ -4,7 +4,7 @@
  # Ubuntu 20.04 (focal)

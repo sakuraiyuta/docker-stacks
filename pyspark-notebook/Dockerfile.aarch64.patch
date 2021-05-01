@@ -1,4 +1,4 @@
---- Dockerfile.orig
+--- Dockerfile
 +++ Dockerfile.aarch64
 @@ -1,10 +1,16 @@
  # Copyright (c) Jupyter Development Team.
