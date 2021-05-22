@@ -14,6 +14,8 @@ if [[ ! -z "${JUPYTERHUB_API_TOKEN}" ]]; then
     exec /usr/local/bin/start-singleuser.sh "$@"
 elif [[ ! -z "${JUPYTER_ENABLE_LAB}" ]]; then
     . /usr/local/bin/start.sh $wrapper jupyter lab "$@"
+elif [[ ! -z "${NTERACT}" ]]; then
+    . /usr/local/bin/start.sh $wrapper jupyter nteract "$@"    
 else
     echo "WARN: Jupyter Notebook deprecation notice https://github.com/jupyter/docker-stacks#jupyter-notebook-deprecation-notice."
     . /usr/local/bin/start.sh $wrapper jupyter notebook "$@"

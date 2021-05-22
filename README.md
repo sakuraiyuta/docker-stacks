@@ -81,6 +81,17 @@ files written to `~/work` in the container remain intact on the host.
 
     docker run --rm -p 10000:8888 -e JUPYTER_ENABLE_LAB=yes -v "$PWD":/home/jovyan/work jupyter/datascience-notebook:9b06df75e445
 
+**Example 4: nteract** As above, this command pulls the `jupyter/datascience-notebook` image tagged `latest`
+from Docker Hub if it is not already present on the local host. It then starts an _ephemeral_
+container running a Jupyter Notebook server and exposes the server on host port 10000. The command
+mounts the current working directory on the host as `/home/jovyan/work` in the container. The server
+logs appear in the terminal. Visiting `http://<hostname>:10000/?token=<token>` in a browser loads the 
+[nteract](https://blog.nteract.io/nteract-on-jupyter-53cc2c38290d) front end, where `hostname` is the name of the computer running docker and `token` is the secret
+token printed in the console. Docker destroys the container after notebook server exit, but any
+files written to `~/work` in the container remain intact on the host.
+
+    docker run --rm -p 10000:8888 -e NTERACT=yes -v "$PWD":/home/jovyan/work jupyter/datascience-notebook:latest
+
 ## Contributing
 
 Please see the [Contributor Guide on ReadTheDocs](http://jupyter-docker-stacks.readthedocs.io/) for
